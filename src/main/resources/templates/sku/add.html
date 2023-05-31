@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>添加商品Sku</title>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/popper.min.js}"></script>
+    <link th:href="@{/css/bootstrap-4.6.1.min.css}" rel="stylesheet"/>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <form th:action="@{/sku/save}" method="POST" >
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">所属商品Spu：</div>
+            </div>
+            <select name="sku_spu_id" class="form-control select-spu">
+                <option value="">--选择所属商品Spu--</option>
+                <option th:each="spu:${spuList}"
+                        th:text="${spu.spu_name}"
+                        th:value="${spu.spu_id}">商品名称</option>
+
+            </select>
+        </div>
+
+        <!--  选择规格属性的模板  -->
+        <div class="attr-group">
+
+        </div>
+
+        <!--  /选择规格属性的模板  -->
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku名称：</div>
+            </div>
+            <input type="text" name="sku_name" class="form-control" placeholder="商品Sku名称"/>
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku原价：</div>
+            </div>
+            <input type="text" name="sku_originalprice" class="form-control" placeholder="商品Sku原价"/>
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku折扣金额：</div>
+            </div>
+            <input type="text" name="sku_costprice" class="form-control" placeholder="商品Sku折扣金额"/>
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku售价：</div>
+            </div>
+            <input type="text" name="sku_price" class="form-control" placeholder="商品Sku售价"/>
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku库存：</div>
+            </div>
+            <input type="text" name="sku_quantity" class="form-control" placeholder="商品Sku库存"/>
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku序号：</div>
+            </div>
+            <input type="text" name="sortno" class="form-control" placeholder="商品Sku序号"/>
+        </div>
+
+        <button type="submit" class="btn btn-primary"> 添加商品Sku </button>
+
+    </form>
+
+    <!-- 隐藏的，原子，规格属性键的div -->
+    <div class="input-group my-2 attr " style="display:none" >
+        <div class="input-group-append">
+            <div class="input-group-text show-key-name">请选择{属性键的名称}：</div>
+        </div>
+        <input type="hidden" name="skuAttrBoList[0].spu_id"  class="form-control hidden-spu-id" />
+        <input type="hidden" name="skuAttrBoList[0].key_id"  class="form-control hidden-key-id" />
+        <input type="hidden" name="skuAttrBoList[0].key_name"  class="form-control hidden-key-name" />
+        <input type="hidden" name="skuAttrBoList[0].value_name"  class="form-control hidden-value-name" />
+        <select name="skuAttrBoList[0].value_id" class="form-control select-attr-value">
+            <option value="">--请选择--</option>
+        </select>
+    </div>
+
+
+</div>
+
+<div style="height:100px;"></div>
+
+<script>
+$(document).ready(()=>{
+
+    // 选择的属性值改变
+    $(".select-attr-value").change(function(){
+        // 当前选择的选项的 文本文字
+        let value_name =  this.options[this.selectedIndex].innerText
+        // 给 value_name 隐藏域 赋值
+        $(this).siblings(".hidden-value-name").val( value_name )
+    })
+
+    // 选择的spu改变
+    $(".select-spu").change(function(){
+        // 发送 ajax 请求 查询 选中的spu的 规格属性列表
+        $.ajax({
+            url : "/attr-value/getSkuAttrKeyListBySpuId",
+            type : "GET",
+            data : { "spu_id" : $(".select-spu").val() },
+            success : function(response){
+                // 将 响应报文 解析成 json 对象
+                response = JSON.parse( response )
+                // 先将 规格属性面板中 原来的内容清空
+                $(".attr-group").html("")
+
+                // 遍历 属性键
+                for( let i = 0 ; i <= response.length - 1 ; i++  ){
+                    let key = response[i]
+                    // 克隆一份模板
+                    let clone = $(".attr").last().clone(true)
+                    // 追加到 规格属性面板中
+                    clone.appendTo( $(".attr-group") )
+                    // 显示出来
+                    clone.show()
+                    // 设置提示信息
+                    clone.find(".show-key-name").text("请选择"+key.key_name+"：")
+                    // 设置属性 控件的 name
+                    clone.find(".hidden-spu-id").prop("name","skuAttrBoList["+i+"].spu_id")         //商品编号
+                    clone.find(".hidden-key-id").prop("name","skuAttrBoList["+i+"].key_id")         //规格属性键id
+                    clone.find(".hidden-key-name").prop("name","skuAttrBoList["+i+"].key_name")     //规格属性键名称
+                    clone.find(".hidden-value-name").prop("name","skuAttrBoList["+i+"].value_name") //规格属性值名称
+                    clone.find(".select-attr-value").prop("name","skuAttrBoList["+i+"].value_id")   //规格属性值id
+                    // 设置属性 控件的 value值
+                    clone.find(".hidden-spu-id").val( $(".select-spu").val() )
+                    clone.find(".hidden-key-id").val( key.key_id )
+                    clone.find(".hidden-key-name").val( key.key_name )
+                    // 遍历 当前属性键 的 属性值 列表
+
+                    console.log(key.spuAttrValueList)
+                    for( let value of key.spuAttrValueList ){
+                        // 根据当前遍历到的属性值 生成一个 option选项
+                        let op = new Option( value.value_name , value.id )
+                        // 将 option选项添加到下拉列表中
+                        clone.find(".select-attr-value").get(0).options.add( op )
+                    }
+                }
+            }
+        })
+    })
+
+})
+</script>
+
+</body>
+</html>

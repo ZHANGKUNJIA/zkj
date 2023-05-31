@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>修改商品Sku</title>
+    <link href="/css/bootstrap-4.6.1.min.css" rel="stylesheet"/>
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap-4.6.1.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <form action="/sku/alter" method="POST" >
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku编号：</div>
+            </div>
+            <input type="text" class="form-control"  readonly
+                />
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">所属商品Spu：</div>
+            </div>
+            <select  class="form-control select-spu">
+            </select>
+        </div>
+
+        <!--  选择规格属性面板  -->
+        <div class="attr-group">
+            <!--  选择规格属性的模板  -->
+            <div class="input-group my-2 attr" >
+                <div class="input-group-append">
+                    <div class="input-group-text show-key-name"
+                        >请选择{属性键的名称}：</div>
+                </div>
+                <input type="hidden"  class="form-control hidden-spu-id"
+                    />
+                <input type="hidden" class="form-control hidden-key-id"
+                    />
+                <input type="hidden"  class="form-control hidden-key-name"
+                    />
+                <input type="hidden"  class="form-control hidden-value-name"
+                    />
+                <select  class="form-control select-attr-value">
+                </select>
+            </div>
+            <!--  /选择规格属性的模板  -->
+        </div>
+        <!--  /选择规格属性面板  -->
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku名称：</div>
+            </div>
+            <input type="text" class="form-control" placeholder="商品Sku名称"
+                />
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku原价：</div>
+            </div>
+            <input type="text" class="form-control" placeholder="商品Sku原价"
+                  />
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku折扣金额：</div>
+            </div>
+            <input type="text" class="form-control" placeholder="商品Sku折扣金额"
+                  />
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku售价：</div>
+            </div>
+            <input type="text"  class="form-control" placeholder="商品Sku售价"
+                   />
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku库存：</div>
+            </div>
+            <input type="text" class="form-control" placeholder="商品Sku库存"
+                   />
+        </div>
+
+        <div class="input-group my-2">
+            <div class="input-group-append">
+                <div class="input-group-text">商品Sku序号：</div>
+            </div>
+            <input type="text" class="form-control" placeholder="商品Sku序号"
+               />
+        </div>
+
+        <button type="submit" class="btn btn-primary"> 保存设置 </button>
+
+    </form>
+
+
+
+</div>
+
+<div style="height:100px;"></div>
+
+<script>
+$(document).ready(()=>{
+
+})
+</script>
+
+</body>
+</html>

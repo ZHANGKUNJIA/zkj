@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>员工管理页面</title>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/popper.min.js}"></script>
+    <link th:href="@{/css/bootstrap-4.6.1.min.css}" rel="stylesheet"/>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="alert alert-primary my-2"> 员工管理 </div>
+    </div>
+
+    <div class="container-fluid">
+        <!--  筛选条件  -->
+        <form th:action="@{/admin/admin}" method="POST" name="form1">
+            <div class="row mb-3">
+<!--                第一行的3个条件，每个条件都要占据4列-->
+                <div class="col-4">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">员工编号：</div>
+                        </div>
+                        <input type="text" class="form-control" name="admin_id" placeholder="请输入员工编号"
+                                th:value="${adminSearchBo.admin_id}"/>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">账户名称：</div>
+                        </div>
+                        <input type="text" class="form-control" name="admin_name" placeholder="请输入账户名称"
+                               th:value="${adminSearchBo.admin_name}"/>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">员工姓名：</div>
+                        </div>
+                        <input type="text" class="form-control" name="admin_nickname" placeholder="请输入员工姓名"
+                               th:value="${adminSearchBo.admin_nickname}"/>
+                    </div>
+                </div>
+
+<!--                第2行，有一个查询条件（按员工角色查询，）占据4列，后续的按钮要占据8列-->
+                <div class="col-4 mt-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">员工角色：</div>
+                        </div>
+                        <select class="form-control" name="role_id">
+                            <!--所有角色,value=-1 -->
+                            <option value="-1">--所有角色--</option>
+                            <!-- 从数据库中要遍历所有的角色列表 -->
+                            <option th:each="role:${roleList}"
+                                    th:text="${role.role_name}"
+                                    th:value="${role.role_id}"
+                                    th:selected="${adminSearchBo.role_id==role.role_id}">数据库角色</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-8 mt-3">
+                    <input type="hidden" name="pageSize" value="pageSize"/>
+                    <input type="hidden" name="page" value=""/>
+                    <input type="hidden" id="pageCount " />
+                    <!-- bootstrap框架中的按钮组样式 -->
+                    <div class="btn-group">
+
+                        <button type="submit" class="btn btn-primary"> 查 询 </button>
+                        <a th:href="@{/admin/add}" class="btn btn-success"> 添加员工 </a>
+                        <button type="button" class="btn btn-danger btn-multi-delete">批量删除</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!--  /筛选条件  -->
+    </div>
+
+    <!--  满足条件的员工数据  -->
+    <div class="container-fluid">
+        <!-- form2的表单，会提交给/admin/multiDel视图方法-> /admin/delete -->
+        <form th:action="@{/admin/delete}" method="post" name="form2">
+            <table class="table table-bordered table-striped table-sm" >
+    <!--            表头的信息-->
+                <thead>
+                    <tr>
+                        <th>    <input type="checkbox"/>    </th>
+                        <th > 员工编号 </th>
+                        <th> 账户名称 </th>
+                        <th> 员工姓名 </th>
+                        <th> 员工角色 </th>
+                        <th> 操作选项 </th>
+                    </tr>
+                </thead>
+                <tbody>
+    <!--                表格正文的数据，遍历从视图方法中得到的brandList的数据，让tr标签要开始进行循环-->
+                    <tr th:each="admin:${adminList}">
+    <!--                    单选框 增加name属性，用于js判断/作为表单数据的传递，要传递给视图方法的入参-->
+                        <td>    <input type="checkbox" name="id_list" th:value="${admin.admin_id}"/>    </td>
+                        <td th:text="${admin.admin_id}">  </td>
+                        <td th:text="${admin.admin_name}">  </td>
+                        <td th:text="${admin.admin_nickname}">
+
+                        </td>
+                        <td >
+                            <span th:each="curRole:${admin.roleList}"
+                                    th:text="${curRole.role_name}" class="mr-1">
+
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-success"> 编辑 </button>
+                                <!-- 单个删除的 链接/admin/delete
+                                    href属性需要设置成正确的值,希望能调用到java的单选删除视图方法
+                                -->
+                                <a th:href="@{/admin/delete?admin_id=} + ${admin.admin_id}" class="btn btn-danger admin-delete"> 删除 </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+
+    <!--  分页控件  -->
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col-6">
+                <div class="btn-group">
+                    <button class="btn btn-primary page-first"
+                            >首页</button>
+                    <button class="btn btn-primary page-prev"
+                            >上一页</button>
+
+                    <button class="btn btn-primary page-next"
+                            >下一页</button>
+                    <button class="btn btn-primary page-last"
+                            >末页</button>
+
+                    <button class="btn btn-light page-dote" style="display:none;">...</button>
+                    <button class="btn btn-light page-num" style="display:none;">1</button>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="input-group">
+                    <input type="text" class="page-jump form-control"  dir="rtl"/>
+                    <div class="input-group-append">
+                        <div class="input-group-text" ></div>
+                    </div>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-primary btn-jump"> Go </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <select class="form-control control-page-size">
+                    <option value="10" >每页显示10条记录</option>
+                    <option value="20" >每页显示20条记录</option>
+                    <option value="30" >每页显示30条记录</option>
+                    <option value="50" >每页显示50条记录</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <!--  /分页控件  -->
+    <script>
+        $(document).ready(()=>{
+
+            // 给 【删除】按钮 注册 点击事件
+            $(".admin-delete").click(function(){
+                // 让用户确认不可逆的操作
+                if( confirm("您确定要删除该用户吗？") == false ){
+                    // 阻止超链接的默认事件（超链接的默认事件href事件）
+                    event.preventDefault()
+                }
+            })
+
+            //批量删除事件
+            $(".btn-multi-delete").click(function(){
+                //判断id_list的所有被选中的复选框，是否至少有1项
+                //$("input")...查找所有的input html标记
+                //$("input[name='id_list']").....查找name属性=id_list的dom对象，包装成jquery仓库
+                //$("input[name='id_list']:checked")...查找所有被选中的id_list的复选框
+                //$("input[name='id_list']:checked").length...得到所有被选中的id_list的复选框个数
+                if($("input[name='id_list']:checked").length==0)
+                {
+                    alert("请至少选择1个要操作的选项")
+                    return
+                }
+
+                //出confirm框，要防止用户误操作
+                if(confirm("您确定要删除选中的选项吗？")==false){
+                    //放弃 return掉
+                    return
+                }
+
+                //提交第2个表单，post id_list数据给/admin/delete
+                form2.submit()
+            })
+
+
+            // 给 【Go】按钮 注册 点击事件
+            $(".btn-jump").click(function(){
+                // 将 表单中的当前页面控件的值 修改为 用户填写的值
+                $("input[name='page']").val( $(".page-jump").val() )
+                // 让 表单提交
+                form1.submit()
+            })
+
+            // 加载 分页控件
+            let page = parseInt( $("input[name='page']").val() )
+            let pageCount = parseInt( $("#pageCount").val() )
+            // 判断 当前页 是否是在前4页
+            if( page <= 4 ){
+                // 循环数字页码
+                for( let i = 1 ; i <= ( pageCount < 7 ? pageCount : 7 ) ; i++ ){
+                    // 克隆一个数字控件
+                    let clone = $(".page-num").last().clone(true)
+
+                    // 修改克隆的数字控件的页码
+                    clone.text( i )
+
+                    // 判断 当前循环到的页面 是否就是 当前页
+                    if( i == page ){
+                        // 更改当前控件的样式
+                        clone.removeClass("btn-light")
+                        clone.addClass("btn-primary")
+                    }
+
+                    // 将 克隆的数字控件追加到 【下一页】的前面
+                    clone.insertBefore( $(".page-next") )
+
+                    // 将 克隆的数字控件 显示出来
+                    clone.show()
+                }
+                // 生成 【....】
+                if( pageCount > 7 ){
+                    // 克隆一个【...】
+                    let clone = $(".page-dote").last().clone(true)
+                    // 将 克隆的控件追加到 【下一页】的前面
+                    clone.insertBefore( $(".page-next") )
+                    // 将 克隆的控件 显示出来
+                    clone.show()
+                }
+            }
+            // 判断 当前页 是否是在最后4页
+            else if( page >= pageCount - 3 ){
+                // 生成 【....】
+                if( pageCount > 7 ){
+                    // 克隆一个【...】
+                    let clone = $(".page-dote").last().clone(true)
+                    // 将 克隆的控件追加到 【下一页】的前面
+                    clone.insertBefore( $(".page-next") )
+                    // 将 克隆的控件 显示出来
+                    clone.show()
+                }
+                // 循环数字页码
+                for( let i = pageCount - 6 ; i <= pageCount ; i++ ){
+                    // 克隆一个数字控件
+                    let clone = $(".page-num").last().clone(true)
+
+                    // 修改克隆的数字控件的页码
+                    clone.text( i )
+
+                    // 判断 当前循环到的页面 是否就是 当前页
+                    if( i == page ){
+                        // 更改当前控件的样式
+                        clone.removeClass("btn-light")
+                        clone.addClass("btn-primary")
+                    }
+
+                    // 将 克隆的数字控件追加到 【下一页】的前面
+                    clone.insertBefore( $(".page-next") )
+
+                    // 将 克隆的数字控件 显示出来
+                    clone.show()
+                }
+            }
+            // 当前页 在 中间页
+            else{
+                // 生成 【....】
+                if( pageCount > 7 ){
+                    // 克隆一个【...】
+                    let clone = $(".page-dote").last().clone(true)
+                    // 将 克隆的控件追加到 【下一页】的前面
+                    clone.insertBefore( $(".page-next") )
+                    // 将 克隆的控件 显示出来
+                    clone.show()
+                }
+                // 循环数字页码
+                for( let i = page - 3 ; i <= page + 3 ; i++ ){
+                    // 克隆一个数字控件
+                    let clone = $(".page-num").last().clone(true)
+
+                    // 修改克隆的数字控件的页码
+                    clone.text( i )
+
+                    // 判断 当前循环到的页面 是否就是 当前页
+                    if( i == page ){
+                        // 更改当前控件的样式
+                        clone.removeClass("btn-light")
+                        clone.addClass("btn-primary")
+                    }
+
+                    // 将 克隆的数字控件追加到 【下一页】的前面
+                    clone.insertBefore( $(".page-next") )
+
+                    // 将 克隆的数字控件 显示出来
+                    clone.show()
+                }
+                // 生成 【....】
+                if( pageCount > 7 ){
+                    // 克隆一个【...】
+                    let clone = $(".page-dote").last().clone(true)
+                    // 将 克隆的控件追加到 【下一页】的前面
+                    clone.insertBefore( $(".page-next") )
+                    // 将 克隆的控件 显示出来
+                    clone.show()
+                }
+            }
+
+            // 给 数字页码 控件 注册 点击事件
+            $(".page-num").click(function(){
+                // 让 表单中 当前页码控件的值 改变成当前页码
+                $("input[name='page']").val( $(this).text() )
+                // 让 表单提交
+                form1.submit()
+            })
+
+            // 给 每页显示记录数 下拉列表 注册 onchange事件
+            $(".control-page-size").change(function(){
+                // 将 每页显示记录数 下拉列表的 选中的值 赋值给 表单中的控件
+                $("input[name='pageSize']").val( $(this).val() )
+                // 让表单提交
+                form1.submit()
+            })
+            // 给 【下一页】 注册 onclick事件
+            $(".page-next").click(function(){
+                // 让 表单中 当前页码控件的值 自增
+                $("input[name='page']").val( parseInt( $("input[name='page']").val() ) + 1 )
+                // 让 表单 提交
+                form1.submit()
+            })
+            // 给 【上一页】 注册 onclick事件
+            $(".page-prev").click(function(){
+                // 让 表单中 当前页码控件的值 自减
+                $("input[name='page']").val( parseInt( $("input[name='page']").val() ) - 1 )
+                // 让 表单 提交
+                form1.submit()
+            })
+            // 给 【首页】 注册 onclick事件
+            $(".page-first").click(function(){
+                // 让 表单中 当前页码控件的值 恢复到 第1页
+                $("input[name='page']").val( 1 )
+                // 让 表单 提交
+                form1.submit()
+            })
+            // 给 【末页】 注册 onclick事件
+            $(".page-last").click(function(){
+                // 让 表单中 当前页码控件的值 设置为 总页数
+                $("input[name='page']").val( $("#pageCount").val() )
+                // 让 表单 提交
+                form1.submit()
+            })
+        })
+    </script>
+</body>
+</html>

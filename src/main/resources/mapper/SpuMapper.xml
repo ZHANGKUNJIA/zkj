@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.atstudy.mapper.SpuMapper">
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*)
+        from
+        `spu`
+        <where>
+            <if test="spuSearchBo.spu_id != null">
+                `spu_id` = #{spuSearchBo.spu_id}
+            </if>
+            <if test="spuSearchBo.spu_name != null and spuSearchBo.spu_name.length > 0 ">
+                and `spu_name` like '%${spuSearchBo.spu_name}%'
+            </if>
+            <if test="spuSearchBo.spu_status != null and spuSearchBo.spu_status != -1">
+                and `spu_status` = #{spuSearchBo.spu_status}
+            </if>
+            <if test="spuSearchBo.spu_brand_id != null and spuSearchBo.spu_brand_id.length > 0">
+                and `spu_brand_id` = #{spuSearchBo.spu_brand_id}
+            </if>
+        </where>
+    </select>
+
+    <!-- 步骤1：查spu主表数据，步骤2:通过association关联出品牌的数据-->
+    <select id="getListWithBrand" resultMap="SpuWithBrand">
+        select *
+        from
+        `spu`
+        <where>
+            <if test="spuSearchBo.spu_id != null">
+                `spu_id` = #{spuSearchBo.spu_id}
+            </if>
+            <if test="spuSearchBo.spu_name != null and spuSearchBo.spu_name.length > 0 ">
+                and `spu_name` like '%${spuSearchBo.spu_name}%'
+            </if>
+            <if test="spuSearchBo.spu_status != null and spuSearchBo.spu_status != -1">
+                and `spu_status` = #{spuSearchBo.spu_status}
+            </if>
+            <if test="spuSearchBo.spu_brand_id != null and spuSearchBo.spu_brand_id.length > 0">
+                and `spu_brand_id` = #{spuSearchBo.spu_brand_id}
+            </if>
+        </where>
+        limit
+        #{pageBo.startIndex},#{pageBo.pageSize}
+    </select>
+
+    <resultMap id="SpuWithBrand" type="Spu" >
+        <id property="spu_id" column="spu_id"></id>
+        <result property="spu_name" column="spu_name"></result>
+        <result property="spu_title" column="spu_title"></result>
+        <result property="spu_introduction" column="spu_introduction"></result>
+        <result property="spu_unit" column="spu_unit"></result>
+
+        <result property="spu_status" column="spu_status"></result>
+        <result property="createtime" column="createtime"></result>
+        <result property="updatetime" column="updatetime"></result>
+        <result property="spu_brand_id" column="spu_brand_id"></result>
+        <association property="brand" javaType="Brand"
+                     column="spu_brand_id" select="com.atstudy.mapper.BrandMapper.getOne"/>
+    </resultMap>
+
+    <select id="getVo" resultMap="SpuVo">
+        select *
+        from spu s
+        where spu_id =#{spu_id}
+    </select>
+
+    <resultMap id="SpuVo" type="SpuVo" extends="SpuWithBrand">
+        <!-- 额外带出，商品-分类列表的数据-->
+        <collection select="com.atstudy.mapper.CategoryMapper.getListBySpuId" column="spu_id"
+                    property="categoryList" ofType="Category"></collection>
+
+        <!-- 额外带出，商品-筛选属性列表的数据-->
+        <collection select="com.atstudy.mapper.SpuAttrKeyMapper.getFiltersBySpuId" column="spu_id"
+                    property="filterList" ofType="AttributeVo"></collection>
+
+        <!-- 额外带出，商品-规格属性列表的数据-->
+        <collection select="com.atstudy.mapper.SpuAttrKeyMapper.getSkusBySpuId" column="spu_id"
+                    property="skuList" ofType="AttributeVo"></collection>
+    </resultMap>
+
+    <update id="updateOne">
+        UPDATE spu
+        SET spu_name=#{updateSpuBo.spu_name},
+            spu_title=#{updateSpuBo.spu_title},
+            spu_introduction=#{updateSpuBo.spu_introduction},
+            spu_unit=#{updateSpuBo.spu_unit},
+            spu_status=#{updateSpuBo.spu_status},
+            updatetime=#{updateSpuBo.updatetime},
+            spu_brand_id=#{updateSpuBo.spu_brand_id}
+        WHERE spu_id=#{updateSpuBo.spu_id}
+    </update>
+
+    <select id="getOne" resultType="Spu">
+        select *
+        from spu s
+        where spu_id =#{spu_id}
+    </select>
+
+
+    <insert id="addOne" useGeneratedKeys="true" keyProperty="spu_id">
+        insert into `spu`
+        (
+            `spu_name`,
+            `spu_title`,
+            `spu_introduction`,
+            `spu_unit`,
+            `spu_status`,
+            `spu_brand_id`,
+            `createtime`,
+            `updatetime`
+        )
+        values
+        (
+            #{addSpuBo.spu_name},
+            #{addSpuBo.spu_title},
+            #{addSpuBo.spu_introduction},
+            #{addSpuBo.spu_unit},
+            #{addSpuBo.spu_status},
+            #{addSpuBo.spu_brand_id},
+            #{addSpuBo.createtime},
+            #{addSpuBo.updatetime}
+        )
+    </insert>
+
+    <select id="getAll" resultType="Spu">
+        select spu_id,spu_name
+        from spu s
+        where spu_id between 72447904099 and 100000872543
+    </select>
+</mapper>

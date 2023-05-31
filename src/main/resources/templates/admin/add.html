@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>添加员工</title>
+    <link th:href="@{/css/bootstrap-4.6.1.min.css}" rel="stylesheet"/>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/popper.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <form th:action="@{/admin/save}" method="POST">
+            <div class="input-group my-2">
+                <div class="input-group-append">
+                    <div class="input-group-text">账户名称：</div>
+                </div>
+                <input type="text" name="admin_name" class="form-control" placeholder="请输入账户名称"/>
+            </div>
+            <div class="my-2 px-3 info-name">
+
+            </div>
+            <div class="input-group my-2">
+                <div class="input-group-append">
+                    <div class="input-group-text">员工姓名：</div>
+                </div>
+                <input type="text" name="admin_nickname" class="form-control" placeholder="请输入员工姓名"/>
+            </div>
+            <div class="input-group my-2">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">员工角色：</div>
+                </div>
+                <div class="input-group-append">
+                    <!-- 点击+按钮 触发这个button的click事件 btn-role-add-->
+                    <button type="button" class="btn btn-success btn-role-add"> + </button>
+                </div>
+            </div>
+
+            <!-- 所有.role的div分组、容器  -->
+            <div class="my-2 row role-group">
+                <!-- role-div的开始 $(".role") 就可以得到classname是role的jquery仓库 -->
+                <div class="col-4 role my-2">
+                    <div class="input-group">
+                        <!--todo，后续解释roleList[0] 是什么内容 -->
+                        <select name="roleList[0].role_id" class="form-control select-role">
+                            <option th:each="role:${roleList}"
+                                    th:text="${role.role_name}"
+                                    th:value="${role.role_id}"></option>
+                        </select>
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-danger btn-role-dis"> - </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- role-div的结束 -->
+
+            </div>
+
+            <button type="submit" class="btn btn-primary"> 添加员工 </button>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(()=>{
+
+            // 重新排列 角色下拉列表的 name->为了springmvc/springboot框架，java视图方法的入参addAdminBo对象中的roleList属性，参数接收
+            function refresh(){
+                // 循环 每一个 角色
+                $(".role").each( function( index , dom ){
+                    console.log(index)
+                    console.log(dom)
+                    $(this).find(".select-role").prop( "name" , "roleList["+ index +"].role_id" )
+                } )
+            }
+
+            // 删除角色
+            $(".btn-role-dis").click(function(){
+                // 判断是否只剩下最后一个角色（如果只剩最后1个select，是不让删除的）
+                if( $(".role").length > 1 ){
+                    // 剩下不止一个角色 可以删除角色
+                    $(this).parents(".role").remove()
+                    // 重新排列角色下拉列表的name
+                    refresh()
+                }else{
+                    console.log("只剩最后一个select角色了，不要删除了")
+                }
+            })
+            // 添加角色 的button 按钮被点击的click事件
+            $(".btn-role-add").click(function(){
+                // 克隆 一份 角色
+                // $(".role") 就可以得到classname是role的jquery仓库
+                // $(".role").last()，得到jquery仓库的最后1条元素信息
+                // $(".role").last().clone(true)，让最后一组.role的div标签 要复制一份出来->效果：页面上会新增一行select标签
+
+                let clone = $(".role").last().clone(true)
+                // 将 克隆的 角色 追加到 角色列表
+                clone.appendTo( $(".role-group") )
+                // 重新排列角色下拉列表的name
+                refresh()
+            })
+
+            /* 账户名称 验证
+            $("input[name='admin_name']").change(function(){
+                $.ajax({
+                    url : "/admin/validName",
+                    type : "GET",
+                    data : { admin_name : $(this).val() },
+                    success : function(data){
+                        if( data == "true" ){
+                            $(".info-name").html( "<font color='red'> 该账户名称已被使用！请重新填写！ </font>" )
+                        }else if( data == "false" ){
+                            $(".info-name").html( "<font color='green'> 该账户名称可以使用！ </font>" )
+                        }
+                    }
+                })
+            })*/
+        })
+    </script>
+
+</body>
+</html>

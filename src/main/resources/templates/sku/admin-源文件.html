@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品Sku管理</title>
+    <link href="/css/bootstrap-4.6.1.min.css" rel="stylesheet"/>
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap-4.6.1.min.js"></script>
+    <script src="/js/global.js"></script>
+</head>
+<body>
+
+<!--  筛选面板  -->
+<form action="/sku/admin" method="POST" name="form1">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">商品Sku编号：</div>
+                    </div>
+                    <input type="text"  class="form-control" placeholder="商品Sku编号"
+                           />
+                </div>
+            </div>
+
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">商品Spu编号：</div>
+                    </div>
+                    <input type="text"  class="form-control" placeholder="商品Spu编号"
+                          />
+                </div>
+            </div>
+
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">商品Sku名称：</div>
+                    </div>
+                    <input type="text" class="form-control" placeholder="商品Sku名称"
+                           />
+                </div>
+            </div>
+
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">最低单价：</div>
+                    </div>
+                    <input type="text" class="form-control" placeholder="最低单价"
+                           />
+                </div>
+            </div>
+
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">最高单价：</div>
+                    </div>
+                    <input type="text" class="form-control" placeholder="最高单价"
+                           />
+                </div>
+            </div>
+
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">最小库存：</div>
+                    </div>
+                    <input type="text" class="form-control" placeholder="最小库存"
+                          />
+                </div>
+            </div>
+
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">最大库存：</div>
+                    </div>
+                    <input type="text" class="form-control" placeholder="最大库存"
+                          />
+                </div>
+            </div>
+
+            <div class="col-4 my-2">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"> 查 询 </button>
+                    <a href="#" class="btn btn-success"> 添加商品Sku </a>
+                </div>
+                <input type="hidden" name="page" />
+                <input type="hidden" name="pageSize"/>
+                <input type="hidden" class="pageCount"/>
+            </div>
+
+        </div>
+    </div>
+</form>
+<!--  /筛选面板  -->
+
+<!--  数据表格  -->
+<div class="container-fluid my-3">
+    <table class="table table-sm table-bordered table-striped cbx-group">
+        <thead>
+        <tr>
+            <th> Sku编号 </th>
+            <th> Spu编号 </th>
+            <th> Sku名称 </th>
+            <th> 原价 </th>
+            <th> 折扣 </th>
+            <th> 售价 </th>
+            <th> 库存 </th>
+            <th> 序号 </th>
+            <th> 创建时间 </th>
+            <th> 更新时间 </th>
+            <th> 操作选项 </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+
+            <td> Sku编号 </td>
+            <td> Spu编号 </td>
+            <td> Sku名称 </td>
+            <td> 原价 </td>
+            <td> 折扣 </td>
+            <td> 售价 </td>
+            <td> 库存 </td>
+            <td> 序号 </td>
+            <td> 创建时间 </td>
+            <td> 更新时间 </td>
+
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <a href="" class="btn btn-light">查看</a>
+                    <a href="#" class="btn btn-warning">编辑</a>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!--  /数据表格  -->
+
+<!--  分页控件  -->
+<div class="container-fluid my-3">
+    <div class="row">
+        <div class="col-6">
+            <div class="btn-group">
+                <button class="btn btn-primary btn-first">首页</button>
+                <button class="btn btn-primary btn-prev" >上一页</button>
+                <button class="btn btn-primary btn-next">下一页</button>
+                <button class="btn btn-primary btn-last">末页</button>
+            </div>
+            <button class="btn btn-light btn-number" style="display:none;">1</button>
+            <button class="btn btn-light btn-more" style="display:none;">...</button>
+        </div>
+        <div class="col-3">
+            <div class="input-group">
+                <input type="text" class="form-control input-page-jump"  dir="rtl"/>
+                <div class="input-group-append">
+                    <div class="input-group-text"> / <span ></span> 页 </div>
+                </div>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-primary btn-jump"> Go </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <select class="form-control select-page-size">
+                <option value="10"> 每页显示10条记录 </option>
+                <option value="20"> 每页显示20条记录 </option>
+                <option value="30"> 每页显示30条记录 </option>
+                <option value="50"> 每页显示50条记录 </option>
+            </select>
+        </div>
+    </div>
+</div>
+<!--  /分页控件  -->
+<div style="height:100px;"></div>
+
+<script>
+    $(document).ready(()=>{
+
+        ////////////////////////////////////////////////////////////////////////
+        // 单个删除
+        $(".link-delete").click(function(){
+            if( confirm("您确定要删除该选项吗？") == false ){
+                // 阻止超链接的默认事件
+                event.preventDefault()
+            }
+        })
+
+        // 批量删除
+        $(".btn-multi-delete").click(function(){
+            // 判断是否至少选中了一项
+            if( $("input[name='id_list']:checked").length == 0 ){
+                alert("请至少选择一个要操作的选项！")
+                return
+            }
+            // 防止误操作
+            if( confirm("您确定要删除选中的选项吗？") == false){
+                return
+            }
+            // 表单提交到删除方法
+            form2.submit()
+        })
+
+        ////////////////////////////////////////////////////////////////////////
+        // 分页的公共效果
+        // 加载数字页码控件
+        let page = parseInt( $("input[name='page']").val() )
+        let pageCount = parseInt( $(".pageCount").val() )
+
+        // 判断 当前页 是否是 前4页
+        if( page <= 4 ){
+            for( let i = 1 ; i <= (pageCount<7?pageCount:7) ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+            // 追加 【...】按钮
+            let rightmore = $(".btn-more").last().clone(true)
+            rightmore.insertBefore( $(".btn-next") )
+            rightmore.show()
+        }
+        // 判断 当前页 是否是 后4页
+        else if( page >= pageCount - 3 ){
+            // 追加 【...】按钮
+            let leftmore = $(".btn-more").last().clone(true)
+            leftmore.insertBefore( $(".btn-next") )
+            leftmore.show()
+            for( let i = pageCount-6 ; i <= pageCount ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+        }
+        // 当前页 在 中间页
+        else{
+            // 追加 【...】按钮
+            let leftmore = $(".btn-more").last().clone(true)
+            leftmore.insertBefore( $(".btn-next") )
+            leftmore.show()
+            for( let i = page - 3 ; i <= page + 3 ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+            // 追加 【...】按钮
+            let rightmore = $(".btn-more").last().clone(true)
+            rightmore.insertBefore( $(".btn-next") )
+            rightmore.show()
+        }
+
+        // 给数字页码控件 注册点击事件
+        $(".btn-number").click(function(){
+             $("input[name='page']").val( $(this).text() )
+             form1.submit()
+        })
+
+        // 【首页】
+        $(".btn-first").click(function(){
+            $("input[name='page']").val(1)
+            form1.submit()
+        })
+        // 【上一页】
+        $(".btn-prev").click(function(){
+            $("input[name='page']").val( parseInt( $("input[name='page']").val() ) - 1 )
+            form1.submit()
+        })
+        // 【下一页】
+        $(".btn-next").click(function(){
+            $("input[name='page']").val( parseInt( $("input[name='page']").val() ) + 1 )
+            form1.submit()
+        })
+        // 【末页】
+        $(".btn-last").click(function(){
+            $("input[name='page']").val( $(".pageCount").val() )
+            form1.submit()
+        })
+        // 修改每页显示记录数
+        $(".select-page-size").change(function(){
+            $("input[name='pageSize']").val( $(this).val() )
+            form1.submit()
+        })
+        // 立即跳转
+        $(".btn-jump").click(function(){
+            $("input[name='page']").val( $(".input-page-jump").val() )
+            form1.submit()
+        })
+        ////////////////////////////////////////////////////////////////////////
+    })
+    </script>
+
+</body>
+</html>

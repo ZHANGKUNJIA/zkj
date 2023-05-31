@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.atstudy.mapper.BrandMapper">
+    <select id="getOne" resultType="Brand">
+        select * from brand b
+        where brand_id = #{brand_id}
+    </select>
+
+    <insert id="add">
+        INSERT INTO brand
+        (brand_id, brand_name, brand_introduction, brand_logourl, sortno, createtime, updatetime)
+        VALUES(#{addBrandBo.brand_id},
+            #{addBrandBo.brand_name},
+            #{addBrandBo.brand_introduction},
+            #{addBrandBo.brand_logourl},
+            #{addBrandBo.sortno},
+            #{addBrandBo.createtime},
+            #{addBrandBo.updatetime});
+
+    </insert>
+
+    <!--比较容易出错的地方，模糊查询的sql语句 like '%${}%'-->
+    <select id="getList" resultType="Brand">
+        select *
+        from brand b
+        <where>
+            <if test="searchBrandBo.brand_id != null and searchBrandBo.brand_id.length>0">
+                brand_id = #{searchBrandBo.brand_id}
+            </if>
+            <if test="searchBrandBo.brand_name != null and searchBrandBo.brand_name.length>0">
+                and brand_name like '%${searchBrandBo.brand_name}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="getAll" resultType="Brand">
+        select brand_id,brand_name
+        from brand
+    </select>
+
+    <insert id="multiAddCateBrand">
+        INSERT INTO brand_categories
+            (brand_id, category_id)
+        VALUES
+        <foreach collection="addCategoryBo.brandList" item="brand" separator=",">
+            (#{brand.brand_id},#{addCategoryBo.cate_id})
+        </foreach>
+
+    </insert>
+
+    <select id="getListByCate" resultType="Brand">
+        select * from brand_categories bc
+        where category_id = #{cate_id}
+    </select>
+
+    <delete id="delCateBrand">
+        delete from brand_categories
+        where category_id = #{cate_id}
+    </delete>
+
+    <delete id="multiDelCateBrand">
+        delete from brand_categories
+        where category_id in
+        <foreach collection="id_list" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

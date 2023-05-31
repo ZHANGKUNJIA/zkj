@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/popper.min.js}"></script>
+    <link th:href="@{/css/bootstrap-4.6.1.min.css}" rel="stylesheet"/>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</head>
+<body>
+
+<!--  筛选面板  -->
+<form th:action="@{/role/admin}" method="POST" name="form1">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">角色编号：</div>
+                    </div>
+                    <input type="text" name="role_id" class="form-control" placeholder="角色编号"
+                           th:value="${roleSearchBo.role_id}"/>
+                </div>
+            </div>
+            <div class="col-4 my-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">角色名称：</div>
+                    </div>
+                    <input type="text" name="role_name" class="form-control" placeholder="角色名称"
+                           th:value="${roleSearchBo.role_name}" />
+                </div>
+            </div>
+            <div class="col-4 my-2">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary btn-search"> 查 询 </button>
+                    <a th:href="@{/role/add}" class="btn btn-success"> 添加角色 </a>
+                    <button type="button" class="btn btn-danger btn-multi-delete"> 批量删除 </button>
+                </div>
+                <!-- 这三个隐藏域职责：需要负责和视图方法中，的pageBo对象进行数据交互。
+                    ——在页面加载时（第一次访问/点击搜索的按钮/form1表单提交），就需要绑定当前的pageBo的值
+                -->
+                <input type="hidden" name="page" th:value="${pageBo.page}"/>
+                <!-- 每页显示的记录数 -->
+                <input type="hidden" name="pageSize" th:value="${pageBo.pageSize}"/>
+                <!-- 存放，当前查询条件有几页 的数字 ，class="pageCount"在js代码中有使用到-->
+                <input type="hidden" class="pageCount" name="pageCount" th:value="${pageBo.pageCount}"/>
+            </div>
+
+        </div>
+    </div>
+</form>
+<!--  /筛选面板  -->
+
+<!--  数据表格  -->
+<div class="container-fluid my-3">
+    <form th:action="@{/role/delete}" method="POST" name="form2">
+        <table class="table table-sm table-bordered table-striped cbx-group">
+            <thead>
+            <tr>
+                <th> <input type="checkbox" class="cbx-all"/> </th>
+                <th> 角色编号 </th>
+                <th> 角色名称 </th>
+                <th> 操作选项 </th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <!-- roleList 遍历的开始 -->
+            <tr th:each="role:${roleList}">
+                <td> <input type="checkbox" name="id_list" th:value="${role.role_id}"/> </td>
+                <td th:text="${role.role_id}"> 角色编号 </td>
+                <td th:text="${role.role_name}"> 角色名称 </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a th:href="@{/role/update?role_id=}+${role.role_id}" class="btn btn-warning">编辑</a>
+                        <a th:href="@{/role/delete?role_id=}+${role.role_id}" class="btn btn-danger link-delete">删除</a>
+                    </div>
+                </td>
+            </tr>
+            <!-- roleList 遍历的结束 -->
+
+            </tbody>
+        </table>
+    </form>
+</div>
+<!--  /数据表格  -->
+
+<!--  分页控件  -->
+<div class="container-fluid my-3">
+    <div class="row">
+        <div class="col-6">
+            <div class="btn-group">
+                <button class="btn btn-primary btn-first" th:disabled="${pageBo.page}==1">首页</button>
+                <button class="btn btn-primary btn-prev" th:disabled="${pageBo.page}==1">上一页</button>
+                <button class="btn btn-primary btn-next" th:disabled="${pageBo.page}==${pageBo.pageCount}">下一页</button>
+                <button class="btn btn-primary btn-last" th:disabled="${pageBo.page}==${pageBo.pageCount}">末页</button>
+            </div>
+            <button class="btn btn-light btn-number" style="display:none;">1</button>
+            <button class="btn btn-light btn-more" style="display:none;">...</button>
+        </div>
+        <div class="col-3">
+            <div class="input-group">
+                <input type="text" class="form-control input-page-jump"
+                        th:value="${pageBo.page}"/>
+                <div class="input-group-append">
+                    <div class="input-group-text"> / <span th:text="${pageBo.pageCount}"></span> 页 </div>
+                </div>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-primary btn-jump"> Go </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <select class="form-control select-page-size">
+                <option value="10" th:selected="${pageBo.pageSize}==10"> 每页显示10条记录 </option>
+                <option value="20" th:selected="${pageBo.pageSize}==20"> 每页显示20条记录 </option>
+                <option value="30" th:selected="${pageBo.pageSize}==30"> 每页显示30条记录 </option>
+                <option value="50" th:selected="${pageBo.pageSize}==50"> 每页显示50条记录 </option>
+            </select>
+        </div>
+    </div>
+</div>
+<!--  /分页控件  -->
+<div style="height:100px;"></div>
+
+<script>
+    $(document).ready(()=>{
+
+        ////////////////////////////////////////////////////////////////////////
+        // 单个删除
+        $(".link-delete").click(function(){
+            if( confirm("您确定要删除该选项吗？") == false ){
+                // 阻止超链接的默认事件
+                event.preventDefault()
+            }
+        })
+
+        // 批量删除
+        $(".btn-multi-delete").click(function(){
+            // 判断是否至少选中了一项
+            if( $("input[name='id_list']:checked").length == 0 ){
+                alert("请至少选择一个要操作的选项！")
+                return
+            }
+            // 防止误操作
+            if( confirm("您确定要删除选中的选项吗？") == false){
+                return
+            }
+            // 表单提交到删除方法
+            form2.submit()
+        })
+
+        ////////////////////////////////////////////////////////////////////////
+        // 分页的公共效果
+        // 加载数字页码控件
+        let page = parseInt( $("input[name='page']").val() )        //查找name=page的隐藏域的值
+        let pageCount = parseInt( $(".pageCount").val() )           //查找 class=pageCount的隐藏域的值
+
+        // 判断 当前页 是否是 前4页
+        if( page <= 4 ){
+            for( let i = 1 ; i <= (pageCount<7?pageCount:7) ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+            // 追加 【...】按钮
+            let rightmore = $(".btn-more").last().clone(true)
+            rightmore.insertBefore( $(".btn-next") )
+            rightmore.show()
+        }
+        // 判断 当前页 是否是 后4页
+        else if( page >= pageCount - 3 ){
+            // 追加 【...】按钮
+            let leftmore = $(".btn-more").last().clone(true)
+            leftmore.insertBefore( $(".btn-next") )
+            leftmore.show()
+            for( let i = pageCount-6 ; i <= pageCount ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+        }
+        // 当前页 在 中间页
+        else{
+            // 追加 【...】按钮
+            let leftmore = $(".btn-more").last().clone(true)
+            leftmore.insertBefore( $(".btn-next") )
+            leftmore.show()
+            for( let i = page - 3 ; i <= page + 3 ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+            // 追加 【...】按钮
+            let rightmore = $(".btn-more").last().clone(true)
+            rightmore.insertBefore( $(".btn-next") )
+            rightmore.show()
+        }
+
+        // 给数字页码控件 注册点击事件....当点击数字页码button之后，会提交表单的信息（当前页码参数发生变化，把选中的页码的value->赋值给隐藏域page）
+        $(".btn-number").click(function(){
+             $("input[name='page']").val( $(this).text() )
+             form1.submit()
+        })
+
+        // 【首页】
+        $(".btn-first").click(function(){
+            $("input[name='page']").val(1)
+            form1.submit()
+        })
+        // 【上一页】
+        $(".btn-prev").click(function(){
+            $("input[name='page']").val( parseInt( $("input[name='page']").val() ) - 1 )
+            form1.submit()
+        })
+        // 【下一页】
+        $(".btn-next").click(function(){
+            $("input[name='page']").val( parseInt( $("input[name='page']").val() ) + 1 )
+            form1.submit()
+        })
+        // 【末页】
+        $(".btn-last").click(function(){
+            $("input[name='page']").val( $(".pageCount").val() )
+            form1.submit()
+        })
+        // 修改每页显示记录数...onchange事件
+        $(".select-page-size").change(function(){
+            //在页面隐藏域(pageSize的控件)，中存放了新的 每页显示记录数
+            $("input[name='pageSize']").val( $(this).val() )
+            form1.submit()
+        })
+        // 立即跳转
+        $(".btn-jump").click(function(){
+            //设置，需要跳转到哪个页码
+            //input[name='page'].....在页面中会找到隐藏域hidden+名称是page的控件，需要设置它的新的值->表单提交的时候，就可以应用新的页码
+            $("input[name='page']").val( $(".input-page-jump").val() )
+            form1.submit()
+        })
+        // 点击查询的按钮，就需要设置page=1
+        $(".btn-search").click(function(){
+            $("input[name='page']").val( 1 )
+        })
+        ////////////////////////////////////////////////////////////////////////
+    })
+    </script>
+
+</body>
+</html>

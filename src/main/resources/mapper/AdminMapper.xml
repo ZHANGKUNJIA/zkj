@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.atstudy.mapper.AdminMapper">
+    <!-- 需要改造
+    ——要通过collection标签，能关联出“角色列表”List<Role> roleList
+    ——resultType(特定的一个java entitybean)->resultMap（适用于比较复杂的java entitybean，在1次的sql访问中是不足以得到所有的成员属性）
+    -->
+    <select id="getListWithRole" resultMap="AdminWithRole">
+        select distinct a.*
+        from admin a left join admin_role ar
+            on a.admin_id = ar.admin_id
+        <where>
+            <if test="adminSearchBo.admin_id != null">
+                a.admin_id = #{adminSearchBo.admin_id}
+            </if>
+            <if test="adminSearchBo.admin_name != null and adminSearchBo.admin_name.length>0">
+                and a.admin_name like '%${adminSearchBo.admin_name}%'
+            </if>
+            <if test="adminSearchBo.admin_nickname !=null and adminSearchBo.admin_nickname.length>0">
+                and a.admin_nickname like '%${adminSearchBo.admin_nickname}%'
+            </if>
+            <if test="adminSearchBo.role_id != null and adminSearchBo.role_id != -1">
+                and ar.role_id = #{adminSearchBo.role_id}
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="AdminWithRole" type="Admin">
+        <id property="admin_id" column="admin_id"></id>
+        <result property="admin_name" column="admin_name"></result>
+        <result property="admin_pass" column="admin_pass"></result>
+        <result property="admin_nickname" column="admin_nickname"></result>
+
+        <!-- roleList的数据从哪里来？select属性+column属性
+             数据得到后，要赋值给谁？property属性+ofType属性
+        -->
+        <collection select="com.atstudy.mapper.RoleMapper.getListByAdminId" column="admin_id"
+                    property="roleList" ofType="Role"></collection>
+
+    </resultMap>
+
+    <delete id="deleteOne" >
+        delete from admin
+        where admin_id = #{admin_id}
+    </delete>
+
+    <delete id="multiDel">
+        delete from  admin
+        where admin_id in
+                <choose>
+                    <when test="id_list.length > 0">
+                        <foreach collection="id_list" item="id" open="(" close=")" separator=",">
+                            #{id}
+                        </foreach>
+                    </when>
+                    <otherwise>
+                        (-1)
+                    </otherwise>
+                </choose>
+    </delete>
+
+
+    <!-- 需要模拟产生一个错误， 模拟用户删除的第2步失败了；admin_role->写错成admin_ro -->
+    <delete id="deleteAdminRoleByAdminId">
+        delete from admin_role
+        where admin_id = #{admin_id}
+    </delete>
+
+    <delete id="multiDeleteAdminRole">
+        delete from admin_role
+        where admin_id in
+        <choose>
+            <when test="id_list.length > 0">
+                <foreach collection="id_list" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </when>
+            <otherwise>
+                (-1)
+            </otherwise>
+        </choose>
+    </delete>
+
+    <!-- 从mysql的数据中，要能拿到刚刚插入成功的主键的数据 、mybatis的技术点，-->
+    <insert id="addOne" useGeneratedKeys="true" keyProperty="admin_id">
+        INSERT INTO admin
+            (admin_name, admin_pass, admin_nickname)
+        VALUES(#{addAdminBo.admin_name}, #{addAdminBo.admin_pass}, #{addAdminBo.admin_nickname})
+    </insert>
+
+    <!-- 解释一下两个字段的取值
+        ——admin_id的数据，从addOne访问方法的，返回值取得的
+        ——role_id的数据，todo，从add.html页面中取到的数据
+     -->
+    <insert id="multiAddAdminRole">
+        INSERT INTO admin_role
+             (admin_id, role_id)
+        VALUES
+            <foreach collection="addAdminBo.roleList" item="role" separator=",">
+                (#{addAdminBo.admin_id}, #{role.role_id})
+            </foreach>
+
+    </insert>
+
+    <!-- 不需要新增resultMap，要复用，不要重复造轮子 -->
+    <select id="getOneWithRoleList" resultMap="AdminWithRole">
+        select *
+        from admin
+        where admin_id = #{admin_id}
+    </select>
+
+    <update id="updateOne">
+        update admin
+        set
+            admin_name = #{updateAdminBo.admin_name},
+            admin_nickname =  #{updateAdminBo.admin_nickname}
+        where admin_id = #{updateAdminBo.admin_id}
+    </update>
+
+
+    <select id="getOneByName" resultType="Admin">
+        select *
+        from admin
+        where admin_name=#{admin_name}
+    </select>
+
+    <select id="getOneWithRoleAndMenuByName" resultMap="AdminWithRoleAndMenu">
+        select *
+        from admin
+        where admin_name=#{admin_name}
+    </select>
+
+    <resultMap id="AdminWithRoleAndMenu" type="Admin" extends="AdminWithRole">
+        <collection property="menuList" ofType="Menu"
+                    column="admin_id" select="com.atstudy.mapper.MenuMapper.getListByAdminId"/>
+    </resultMap>
+
+
+</mapper>

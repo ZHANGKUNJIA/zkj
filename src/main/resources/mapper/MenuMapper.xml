@@ -1,0 +1,19 @@
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.atstudy.mapper.MenuMapper">
+
+    <select id="getListByAdminId" resultType="Menu">
+        select
+            a.*
+        from
+            `menu` a
+            inner join `permission_menu` b on a.`menu_id` = b.`menu_id`
+            inner join `role_permission` c on b.`permission_id` = c.`permission_id`
+            inner join `admin_role` d on c.`role_id` = d.`role_id`
+        where
+            d.`admin_id` = #{admin_id}
+    </select>
+
+</mapper>

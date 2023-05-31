@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.atstudy.mapper.SkuMapper">
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from sku s
+        <where>
+            <if test="skuSearchBo.sku_id != null">
+                sku_id =#{skuSearchBo.sku_id}
+            </if>
+            <if test="skuSearchBo.sku_spu_id != null">
+                and sku_spu_id = #{skuSearchBo.sku_spu_id}
+            </if>
+            <if test="skuSearchBo.sku_name!=null and skuSearchBo.sku_name.length>0">
+                and sku_name  like '%${skuSearchBo.sku_name}%'
+            </if>
+            <if test="skuSearchBo.sku_min_price != null">
+                and sku_price >= #{skuSearchBo.sku_min_price}
+            </if>
+            <if test="skuSearchBo.sku_max_price != null">
+                and sku_price &lt;= #{skuSearchBo.sku_max_price}
+            </if>
+            <if test="skuSearchBo.sku_min_quantity != null">
+                and sku_quantity >=#{skuSearchBo.sku_min_quantity}
+            </if>
+            <if test="skuSearchBo.sku_max_quantity != null">
+                and sku_quantity &lt;= #{skuSearchBo.sku_max_quantity}
+            </if>
+        </where>
+    </select>
+
+    <select id="getList" resultType="Sku">
+        select * from sku s
+        <where>
+            <if test="skuSearchBo.sku_id != null">
+                sku_id =#{skuSearchBo.sku_id}
+            </if>
+            <if test="skuSearchBo.sku_spu_id != null">
+                and sku_spu_id = #{skuSearchBo.sku_spu_id}
+            </if>
+            <if test="skuSearchBo.sku_name!=null and skuSearchBo.sku_name.length>0">
+                and sku_name  like '%${skuSearchBo.sku_name}%'
+            </if>
+            <if test="skuSearchBo.sku_min_price != null">
+                and sku_price >= #{skuSearchBo.sku_min_price}
+            </if>
+            <if test="skuSearchBo.sku_max_price != null">
+                and sku_price &lt;= #{skuSearchBo.sku_max_price}
+            </if>
+            <if test="skuSearchBo.sku_min_quantity != null">
+                and sku_quantity >=#{skuSearchBo.sku_min_quantity}
+            </if>
+            <if test="skuSearchBo.sku_max_quantity != null">
+                and sku_quantity &lt;= #{skuSearchBo.sku_max_quantity}
+            </if>
+        </where>
+        limit #{pageBo.startIndex},#{pageBo.pageSize}
+    </select>
+
+    <insert id="addOne" useGeneratedKeys="true" keyProperty="sku_id">
+        INSERT INTO atstudy_mall.sku
+            (sku_spu_id, sku_name, sku_spuattr, sku_price, sku_originalprice, sku_costprice, sku_quantity, sortno, createtime, updatetime)
+        VALUES(
+        #{addSkuBo.sku_spu_id},
+        #{addSkuBo.sku_name},
+        #{addSkuBo.sku_spuattr},
+        #{addSkuBo.sku_price},
+        #{addSkuBo.sku_originalprice},
+        #{addSkuBo.sku_costprice},
+        #{addSkuBo.sku_quantity},
+        #{addSkuBo.sortno},
+        #{addSkuBo.createtime},
+        #{addSkuBo.updatetime}
+        )
+
+    </insert>
+</mapper>

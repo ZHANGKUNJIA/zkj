@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.atstudy.mapper.SpuAttrValueMapper">
+    <select id="getListByKeyId" resultType="SpuAttrValue">
+        select *
+        from spu_attr_value sav
+        where value_attr_key_id = #{key_id}
+    </select>
+
+    <delete id="deleteSpuAttrValueRelationBySpuId">
+        delete from spu_attr_value_spus
+        where spu_id =#{spu_id}
+    </delete>
+
+    <!-- 对于筛选属性值来说，图片数据列，默认传递的是空json字符串格式，[] -->
+    <insert id="addSpuAttrValueFilterRelation">
+        INSERT INTO spu_attr_value_spus
+            (spu_attr_value_id, spu_attr_imgs, spu_id)
+        VALUES
+            <foreach collection="updateSpuBo.filterAttrValueList" item="filter" separator=",">
+                (#{filter.spu_attr_value_id}, '[]', #{updateSpuBo.spu_id})
+            </foreach>
+
+    </insert>
+
+    <!--  对于规格属性值来说，图片数据列是需要添加内容的-->
+    <insert id="addSpuAttrValueSkuRelation">
+        INSERT INTO spu_attr_value_spus
+        (spu_attr_value_id, spu_attr_imgs, spu_id)
+        VALUES
+        <foreach collection="updateSpuBo.skuAttrValueList" item="skuvalue" separator=",">
+            (#{skuvalue.spu_attr_value_id}, #{skuvalue.spu_attr_imgs}, #{updateSpuBo.spu_id})
+        </foreach>
+
+    </insert>
+</mapper>

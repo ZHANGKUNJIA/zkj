@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品Spu管理</title>
+
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/popper.min.js}"></script>
+    <link th:href="@{/css/bootstrap-4.6.1.min.css}" rel="stylesheet"/>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="alert alert-primary my-2"> 商品管理 </div>
+</div>
+
+
+<div class="container-fluid">
+
+    <!--  筛选面板  -->
+    <form th:action="@{/spu/admin}" method="POST" name="form1">
+        <div class="row mb-3">
+            <div class="col-4">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">商品Spu编号：</div>
+                    </div>
+                    <input type="text" class="form-control" name="spu_id" placeholder="请输入商品Spu编号"
+                           th:value="${spuSearchBo.spu_id}"/>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">商品Spu名称：</div>
+                    </div>
+                    <input type="text" class="form-control" name="spu_name" placeholder="请输入商品Spu"
+                           th:value="${spuSearchBo.spu_name}"/>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">商品状态：</div>
+                    </div>
+                    <select class="form-control" name="spu_status">
+                        <option value="-1"
+                            th:selected="${spuSearchBo.spu_status}==-1">--所有状态--</option>
+                        <option value="1"
+                            th:selected="${spuSearchBo.spu_status}==1">上架</option>
+                        <option value="0"
+                            th:selected="${spuSearchBo.spu_status}==0">下架</option>
+                    </select>
+
+                </div>
+            </div>
+
+            <div class="col-4 mt-3">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">商品品牌：</div>
+                    </div>
+                    <select class="form-control" name="spu_brand_id">
+                        <option value="">--所有品牌--</option>
+                        <!-- 从数据库中要遍历所有品牌的列表 -->
+                        <option th:each="brand:${brandList}"
+                                th:text="${brand.brand_name}"
+                                th:value="${brand.brand_id}"
+                                th:selected="${spuSearchBo.spu_brand_id==brand.brand_id}">数据库角色</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-8 mt-3">
+                <input type="hidden" name="page" th:value="${pageBo.page}"/>
+                <!-- 每页显示的记录数 -->
+                <input type="hidden" name="pageSize" th:value="${pageBo.pageSize}"/>
+                <!-- 存放，当前查询条件有几页 的数字 ，class="pageCount"在js代码中有使用到-->
+                <input type="hidden" class="pageCount" name="pageCount" th:value="${pageBo.pageCount}"/>
+
+                <!-- bootstrap框架中的按钮组样式 -->
+                <div class="btn-group">
+
+                    <button type="submit" class="btn btn-primary"> 查 询 </button>
+                    <a th:href="@{/spu/add}" class="btn btn-success"> 添加商品 </a>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!--  /筛选面板  -->
+</div>
+
+<!--  数据表格  -->
+<div class="container-fluid my-3">
+    <table class="table table-bordered table-striped table-sm" >
+        <!--            表头的信息-->
+        <thead>
+        <tr>
+            <th > Spu编号 </th>
+            <th> Spu名称 </th>
+            <th> 所属品牌 </th>
+            <th> Spu单位 </th>
+
+            <th> Spu状态 </th>
+            <th> 创建时间 </th>
+            <th> 更新时间 </th>
+            <th> 操作选项 </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="spu:${spuList}">
+            <td th:text="${spu.spu_id}">  </td>
+            <td th:text="${spu.spu_name}">  </td>
+            <td th:text="${spu.brand == null ? '':spu.brand.brand_name }">
+
+            </td>
+            <td th:text="${spu.spu_unit}">
+            </td>
+            <td>
+                <span class="badge badge-danger" th:if="${spu.spu_status==0}">下架</span>
+                <span class="badge badge-success" th:if="${spu.spu_status==1}">上架</span>
+            </td>
+            <td  th:text="${ #dates.format(spu.createtime,'yyyy-MM-dd')}"> 创建时间 </td>
+            <td  th:text="${ #dates.format(spu.updatetime,'yyyy-MM-dd')}"> 更新时间 </td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <a th:href="@{/spu/update?spu_id=} + ${spu.spu_id}" class="btn btn-warning admin-delete"> 编辑 </a>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+<!--  /数据表格  -->
+
+<!--  分页控件  -->
+<div class="container-fluid my-3">
+    <div class="row">
+        <div class="col-6">
+            <div class="btn-group">
+                <button class="btn btn-primary btn-first" th:disabled="${pageBo.page} == 1">首页</button>
+                <button class="btn btn-primary btn-prev" th:disabled="${pageBo.page} == 1">上一页</button>
+                <button class="btn btn-primary btn-next" th:disabled="${pageBo.page} == ${pageBo.pageCount}">下一页</button>
+                <button class="btn btn-primary btn-last" th:disabled="${pageBo.page} == ${pageBo.pageCount}">末页</button>
+            </div>
+            <button class="btn btn-light btn-number" style="display:none;">1</button>
+            <button class="btn btn-light btn-more" style="display:none;">...</button>
+        </div>
+        <div class="col-3">
+            <div class="input-group">
+                <input type="text" class="form-control input-page-jump" th:value="${pageBo.page}" dir="rtl"/>
+                <div class="input-group-append">
+                    <div class="input-group-text"> / <span th:text="${pageBo.pageCount}"></span> 页 </div>
+                </div>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-primary btn-jump"> Go </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <select class="form-control select-page-size">
+                <option value="10" th:selected="${pageBo.pageSize} == 10"> 每页显示10条记录 </option>
+                <option value="20" th:selected="${pageBo.pageSize} == 20"> 每页显示20条记录 </option>
+                <option value="30" th:selected="${pageBo.pageSize} == 30"> 每页显示30条记录 </option>
+                <option value="50" th:selected="${pageBo.pageSize} == 50"> 每页显示50条记录 </option>
+            </select>
+        </div>
+    </div>
+</div>
+<!--  /分页控件  -->
+<div style="height:100px;"></div>
+
+<script>
+    $(document).ready(()=>{
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // 分页的公共效果
+        // 加载数字页码控件
+        let page = parseInt( $("input[name='page']").val() )
+        let pageCount = parseInt( $(".pageCount").val() )
+
+        // 判断 当前页 是否是 前4页
+        if( page <= 4 ){
+            for( let i = 1 ; i <= (pageCount<7?pageCount:7) ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+            // 追加 【...】按钮
+            let rightmore = $(".btn-more").last().clone(true)
+            rightmore.insertBefore( $(".btn-next") )
+            rightmore.show()
+        }
+        // 判断 当前页 是否是 后4页
+        else if( page >= pageCount - 3 ){
+            // 追加 【...】按钮
+            let leftmore = $(".btn-more").last().clone(true)
+            leftmore.insertBefore( $(".btn-next") )
+            leftmore.show()
+            for( let i = pageCount-6 ; i <= pageCount ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+        }
+        // 当前页 在 中间页
+        else{
+            // 追加 【...】按钮
+            let leftmore = $(".btn-more").last().clone(true)
+            leftmore.insertBefore( $(".btn-next") )
+            leftmore.show()
+            for( let i = page - 3 ; i <= page + 3 ; i++ ){
+                // 克隆 数字页码 控件
+                let clone = $(".btn-number").last().clone(true)
+
+                // 更改 数字页码
+                clone.text( i )
+
+                // 判断 当前循环到的数字页码 是否就是 当前页
+                if( i ==  page ){
+                    clone.removeClass("btn-light")
+                    clone.addClass("btn-primary")
+                }
+
+                // 将 克隆的 数字页码 控件 追加到 【下一页】的前面
+                clone.insertBefore( $(".btn-next") )
+
+                // 将 克隆的 数字页码 控件 显示出来
+                clone.show()
+            }
+            // 追加 【...】按钮
+            let rightmore = $(".btn-more").last().clone(true)
+            rightmore.insertBefore( $(".btn-next") )
+            rightmore.show()
+        }
+
+        // 给数字页码控件 注册点击事件
+        $(".btn-number").click(function(){
+             $("input[name='page']").val( $(this).text() )
+             form1.submit()
+        })
+
+        // 【首页】
+        $(".btn-first").click(function(){
+            $("input[name='page']").val(1)
+            form1.submit()
+        })
+        // 【上一页】
+        $(".btn-prev").click(function(){
+            $("input[name='page']").val( parseInt( $("input[name='page']").val() ) - 1 )
+            form1.submit()
+        })
+        // 【下一页】
+        $(".btn-next").click(function(){
+            $("input[name='page']").val( parseInt( $("input[name='page']").val() ) + 1 )
+            form1.submit()
+        })
+        // 【末页】
+        $(".btn-last").click(function(){
+            $("input[name='page']").val( $(".pageCount").val() )
+            form1.submit()
+        })
+        // 修改每页显示记录数
+        $(".select-page-size").change(function(){
+            $("input[name='pageSize']").val( $(this).val() )
+            form1.submit()
+        })
+        // 立即跳转
+        $(".btn-jump").click(function(){
+            $("input[name='page']").val( $(".input-page-jump").val() )
+            form1.submit()
+        })
+        ////////////////////////////////////////////////////////////////////////
+    })
+    </script>
+
+</body>
+</html>
